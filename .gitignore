@@ -1,0 +1,21 @@
+# Virtual Environment
+python-venv
+
+# Compiled 
+*.pyc
+
+# Produced files
+references/
+datasets/
+
+# Results
+*.xlsx
+*.csv
+*.fastq
+
+# Data
+*.rtf
+
+# Testing files
+.test.py
+debug.log

@@ -1,0 +1,17 @@
+
+# nonstandard libraries
+import matplotlib.pyplot as plt
+
+
+def show_saturation(pre_uniques,post_uniques):
+    """ Show scatters for uniques """
+
+    plt.plot(range(len(pre_uniques)),pre_uniques,label = 'Pre-sort')
+    plt.plot(range(len(post_uniques)),post_uniques,label = 'Post-sort')
+    plt.xlabel('Read count')
+    plt.ylabel('Unique read count')
+
+    plt.legend()
+    plt.show(block=False)
+
+    input('Press enter to close...')

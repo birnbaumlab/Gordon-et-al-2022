@@ -1,0 +1,139 @@
+
+# nonstandard libraries
+import numpy as np
+
+# homegrown libraries
+from methods.utilities import hamming_dist
+
+#---------------------------------#
+
+def create_data_generator(fname):
+    """ Opens data as a generator (i.e. don't load data to RAM) """
+    with open(fname,'r') as infile:
+        for line in infile:
+            yield line
+
+#---------------------------------#
+
+def filter_sequence(mystr):
+    """ Returns filtered string, otherwise False """
+    pre  = 'CCCTTGGAGAACCACCTTGTTGG'
+    post = 'GTTTAAGAGCTAAGCTGGAAAAAGTGGCAC'
+    if pre in mystr and post in mystr:
+        return mystr[mystr.index(pre)+len(pre):mystr.index(post)]
+        
+#---------------------------------#
+
+
+def old_frequency_dictionary(data_iter,**kwargs):
+    """ Iterates across data, outputs dictionary with frequencies """
+    freq_dict = {}
+    uniques = [0]
+
+    # default settings
+    settings = {
+            'uniqueness_threshold': 1
+            }
+
+    # adjust filtering settings
+    if 'uniqueness_threshold' in kwargs: 
+        settings['uniqueness_threshold'] = kwargs['uniqueness_threshold']
+
+    # unload in local namespace
+    threshold = settings['uniqueness_threshold']
+
+    for i,line in enumerate(data_iter):
+        my_seq = filter_sequence(line)
+        if my_seq:
+            try:
+                freq_dict[my_seq] += 1
+                if freq_dict[my_seq] == threshold: 
+                    uniques.append(uniques[-1]+1)
+                elif freq_dict[my_seq] > threshold:
+                    uniques.append(uniques[-1])
+
+            except KeyError:
+                freq_dict[my_seq] =  1
+                if threshold == 1:
+                    uniques.append(uniques[-1]+1)
+
+        if i != 0 and i % 500000 == 0:
+            print ('{} lines processed...'.format(i))
+
+    return freq_dict,uniques
+
+def frequency_dictionary(data_iter,**kwargs):
+    """ Iterates across data, outputs dictionary with frequencies """
+    freq_dict = {}
+
+    # default settings
+    settings = {
+            'uniqueness_threshold': 1
+            }
+
+    # adjust filtering settings
+    if 'uniqueness_threshold' in kwargs: 
+        settings['uniqueness_threshold'] = kwargs['uniqueness_threshold']
+
+    # unload in local namespace
+    threshold = settings['uniqueness_threshold']
+
+    for i,line in enumerate(data_iter):
+        my_seq = filter_sequence(line)
+        if my_seq:
+            try:
+                freq_dict[my_seq] += 1
+            except KeyError:
+                freq_dict[my_seq] =  1
+
+        if i != 0 and i % 500000 == 0:
+            print ('{} lines processed...'.format(i))
+
+    return freq_dict
+    
+#---------------------------------#
+
+def adjust_frequency_dictionary(freq_dict,**kwargs):
+
+    # default settings
+    characters = 'ATCG'
+    settings = {
+            'clustering_threshold': 1,
+            'silent':False,
+            }
+
+    # adjust filtering settings
+    if 'clustering_threshold' in kwargs: 
+        settings['clustering_threshold'] = kwargs['clustering_threshold']
+    if 'silent' in kwargs: 
+        settings['silent'] = kwargs['silent']
+        
+    # unload in local namespace
+    threshold = settings['clustering_threshold']
+    silent = settings['silent']
+    
+    freq_items = sorted(freq_dict.items(),key=lambda x: -x[1])
+
+    # convert frequency items to minimum processible form
+    seq2array = dict([(seq[0],np.array([characters.index(s) 
+        for s in seq[0]])) for seq in freq_items])
+
+    filtered_freq_dict = {} 
+    
+    while len(freq_items) > 0:
+
+        item = freq_items[0]
+        filtered_freq_dict[item[0]] = item[1]
+        freq_items.pop(0)
+
+        for j,item2 in enumerate(freq_items):
+            if hamming_dist(seq2array[item[0]],seq2array[item2[0]]) <= threshold:
+                filtered_freq_dict[item[0]] += item2[1]
+                freq_items.pop(j)
+                
+    print('Filtered barcode count: {} -> {}...'.format(
+          len(freq_dict),len(filtered_freq_dict)))
+
+                
+    return filtered_freq_dict         
+    

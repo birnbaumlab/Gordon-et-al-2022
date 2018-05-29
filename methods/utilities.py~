@@ -1,0 +1,8 @@
+
+# nonstandard libraries
+import numpy as np
+
+# FACTORY METHODS
+
+def hamming_dist(a,b):
+    return np.count_nonzero(a!=b)

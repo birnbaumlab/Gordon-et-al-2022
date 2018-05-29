@@ -1,0 +1,39 @@
+
+# standard libraries
+from math import log
+
+#---------------------------------#
+
+def compare_data(seq_dicts):
+    """ Compares arbitrary number of sets of frequency dictionaries for enrichment """
+    data = [('Barcode','Pre-Count','Post-Count','Pre-Frequency','Post-Frequency','Enrichment Frequency Ratio (log2)')]
+    
+    for set
+
+    # Get total sequences in pre/post
+    pre_total = sum(pre_dict.values())
+    post_total = sum(post_dict.values())
+
+    # Check for everything in presort
+    for seq in pre_dict:
+        # get precount
+        pre = float(pre_dict[seq])
+        try:
+            post = float(post_dict[seq])
+            ratio = log((post*pre_total)/(pre*post_total),2)
+            data.append((seq,pre,post,pre/pre_total,post/post_total,ratio))
+        except KeyError:
+            data.append((seq,pre,'N/A',pre/pre_total,'N/A','N/A'))
+
+    # Add things only in postsort
+    for seq in post_dict:
+        try:
+            pre_dict[seq]
+        except KeyError:
+            post = post_dict[seq]
+            data.append((seq,'N/A',post,'N/A',post/post_total,'N/A'))
+
+    return data
+
+#---------------------------------#
+
