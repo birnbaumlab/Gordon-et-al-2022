@@ -15,7 +15,6 @@ A number of user controls are provided for each step of analysis along this anal
 
 ### TODO:
   - Multithreading
-  - User control of BC 5'/3'
 
 ## Requirements
 This package has only been tested on Unix/Linux (OSX, Ubuntu, etc). The project is not platform specific, but installation instructions only apply to these systems. Additionally, all code is formated for Python 3.X.
