@@ -13,14 +13,11 @@ def run(datasets_dict,**kwargs):
     overwrite = False
 
     # datasets submited as dictioanry of lists
-    dataset_filenames = {
+    settings = {
             'reference':None,
             'enrichment':True,
             'counts':True,
             'targets':('BC','Domains')
-            }
-
-    settings = {
             }
 
     # update dictionary
@@ -29,15 +26,22 @@ def run(datasets_dict,**kwargs):
     if 'overwrite' in kwargs: 
         overwrite = kwargs['overwrite']
 
+    # local namespace
+    reference = settings['reference']
+
     wb = openpyxl.Workbook() # open new workbook
 
-    write_counts(datasets_dict,workbook=wb)
-    write_counts(datasets_dict,workbook=wb)
+    comparison = write_counts(datasets_dict,workbook=wb)
+    if reference:
+        comparison = write_counts(datasets_dict,workbook=wb,reference=reference)
+
 
     try: del wb['Sheet']
     except KeyError: pass
 
     wb.save('results.xlsx')
+
+    return comparison
 
 
              

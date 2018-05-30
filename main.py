@@ -1,7 +1,8 @@
 
-from tests import load_dataset 
+from tests import load_dataset
 from tests import create_reference 
 from tests import compare_datasets 
+from tests import generate_visuals 
 
 base = '/run/media/pholec/Seagate Backup Plus Drive/Sequence_Files_PVH/'
 
@@ -19,12 +20,16 @@ dataset_filenames = {
         }
 
 settings = {
-        'dataset_filenames':dataset_filenames,
-        'count_threshold':10,
+        'dataset_filenames': dataset_filenames,
+        'count_threshold':                  10,
         }
 
 datasets = load_dataset.run(**settings)
 reference = create_reference.run()
-
 comparison = compare_datasets.run(datasets,reference=reference)
+
+generate_visuals.run(datasets=datasets,reference=reference,comparison=comparison)
+
+print('Finished!')
+
 

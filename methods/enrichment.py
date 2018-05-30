@@ -1,6 +1,7 @@
 
 # standard libraries
 from math import log
+import collections
 
 # nonstandard libraries
 import openpyxl
@@ -18,8 +19,7 @@ def write_counts(datasets_dict,**kwargs):
             }
 
     # update settings
-    if 'reference' in kwargs:
-        settings['reference'] = kwargs['reference']
+    if 'reference' in kwargs: settings['reference'] = kwargs['reference']
     if 'workbook' in kwargs:
         settings['workbook'] = kwargs['workbook']
     if 'silent' in kwargs:
@@ -31,9 +31,37 @@ def write_counts(datasets_dict,**kwargs):
 
     # create new workbook if one doesn't exist
     if not wb: wb = openpyxl.Workbook() # open new workbook
+    
+    # initialize processed dataset 
+    comparison_datasets = {}
 
     # iterate across dataset in datasets for particular selection
-    for dataset_name,datasets in datasets_dict.items():
+    for dataset_name,raw_datasets in datasets_dict.items():
+
+        comparison_datasets[dataset_name] = {}
+
+        # transform dataset
+        if reference:
+            # if we have a reference to translate barcodes...
+            bc2domain = [(k,collections.Counter(v).most_common(1)) 
+                               for k,v in reference.items()]
+            bc2domain = dict([(k,v[0][0]) for k,v in bc2domain if len(v) > 0])
+
+            datasets = [{} for _ in raw_datasets] 
+
+            for i,raw_dataset in enumerate(raw_datasets):
+                for bc,count in raw_dataset.items():
+                    if bc in bc2domain:
+                        try:
+                            datasets[i][bc2domain[bc]] += count
+                        except KeyError:
+                            datasets[i][bc2domain[bc]]  = count
+                    else:
+                        continue 
+
+        else:
+            # otherwise keep dictionary as is
+            datasets = raw_datasets
 
         # create new worksheet in workbook
         ws = wb.create_sheet(title='Counts - {}'.format(dataset_name))
@@ -74,19 +102,24 @@ def write_counts(datasets_dict,**kwargs):
                 except KeyError:
                     counts.append(0)
             
-            counts += [float(c)/s if s > 0 else 'N/A' for c,s in zip(counts,seq_total)]
+            freqs   = [float(c)/s if s > 0 else 'N/A' for c,s in zip(counts,seq_total)]
+            counts += freqs
+
+            # add counts to specific dataset object
+            comparison_datasets[dataset_name][bc] = freqs 
             
             # store value
             data.append([bc] + counts)
             
-    for row in data:
-        ws.append(row)
+        for row in data:
+            ws.append(row)
 
-    ws.merge_cells(start_row=1, start_column=2, 
-            end_row=1, end_column=1+len(datasets))
-    ws.merge_cells(start_row=1, start_column=2+len(datasets), 
-            end_row=1, end_column=1+2*len(datasets))
+        ws.merge_cells(start_row=1, start_column=2, 
+                end_row=1, end_column=1+len(datasets))
+        ws.merge_cells(start_row=1, start_column=2+len(datasets), 
+                end_row=1, end_column=1+2*len(datasets))
 
+    return comparison_datasets
 
 #---------------------------------#
 
