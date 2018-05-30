@@ -1,5 +1,8 @@
 # DomainSeq
 
+Author: Patrick V. Holec
+Created: May 2018
+
 ## Overview
 This project is a pipeline for analysis of long-read enrichment processes. Specifically, if a library is generated composed of multiple domains, each member of each library in each selection cannot be observed easily through Illumina sequencing due to read-length restrictions. Additionally, PacBio provides the necesssary read-length, but is throughput limited. In these cases, multiple sources of sequencing data can be integrated to allow rapid, deep sequencing of libraries. Three types of files need to be provided:
 
