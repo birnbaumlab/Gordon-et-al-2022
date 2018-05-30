@@ -1,6 +1,7 @@
 # DomainSeq
 
 Author: Patrick V. Holec
+
 Created: May 2018
 
 ## Overview
