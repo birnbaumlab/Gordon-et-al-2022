@@ -19,6 +19,10 @@ def run(**kwargs):
     directory = './references' 
     overwrite = False
 
+    if not os.path.isdir(directory):
+        print('Making {} directory...'.format(directory))
+        os.makedir(directory)
+
     settings = {
             'sequence_reference_filename':             'CCS_Run2.fastq', 
             'domain_reference_filename': 'ICD lists and sequences.xlsx', 

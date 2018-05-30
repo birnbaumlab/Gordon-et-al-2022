@@ -1,5 +1,6 @@
 
 # standard libraries
+import os
 
 # nonstandard libraries
 
@@ -14,6 +15,10 @@ def run(**kwargs):
     directory = './datasets/'
     overwrite = False
 
+    if not os.path.isdir(directory):
+        print('Making {} directory...'.format(directory))
+        os.makedir(directory)
+
     # datasets submited as dictioanry of lists
     dataset_filenames = {
             'Selection Condition 1': ['non-selected.rtf','selected.rtf']
@@ -24,6 +29,8 @@ def run(**kwargs):
             'silent':                                             False,
             'dataset_filenames':                      dataset_filenames,
             'count_threshold':                                       10,
+            'barcode_5p':                                          None,
+            'barcode_3p':                                          None,
             }
 
     # update dictionary
@@ -35,6 +42,10 @@ def run(**kwargs):
         settings['dataset_filenames'] = kwargs['dataset_filenames']
     if 'silent' in kwargs: 
         settings['silent'] = kwargs['silent']
+    if 'barcode_5p' in kwargs: 
+        settings['barcode_5p'] = kwargs['barcode_5p']
+    if 'barcode_3p' in kwargs: 
+        settings['barcode_3p'] = kwargs['barcode_3p']
     if 'overwrite' in kwargs: 
         overwrite = kwargs['overwrite']
 
@@ -47,6 +58,12 @@ def run(**kwargs):
             wb = openpyxl.load_workbook(os.path.join(directory,fname))
 
             loaded_settings = get_xlsx_settings(wb)
+
+            # weird corner case >.<
+            if 'TRUE' in loaded_settings['silent']:
+                loaded_settings['silent'] = True 
+            if 'FALSE' in loaded_settings['silent']:
+                loaded_settings['silent'] = False
 
             if loaded_settings == settings: # if match between current settings
 

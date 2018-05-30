@@ -9,7 +9,6 @@ from methods.enrichment import *
 
 def run(datasets_dict,**kwargs):
 
-    directory = './datasets/'
     overwrite = False
 
     # datasets submited as dictioanry of lists

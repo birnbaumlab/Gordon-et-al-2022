@@ -15,10 +15,12 @@ def create_data_generator(fname):
 
 #---------------------------------#
 
-def filter_sequence(mystr):
+def filter_sequence(mystr,pre=None,post=None):
     """ Returns filtered string, otherwise False """
-    pre  = 'CCCTTGGAGAACCACCTTGTTGG'
-    post = 'GTTTAAGAGCTAAGCTGGAAAAAGTGGCAC'
+    if pre == None:
+        pre  = 'CCCTTGGAGAACCACCTTGTTGG'
+    if post == None:
+        post = 'GTTTAAGAGCTAAGCTGGAAAAAGTGGCAC'
     if pre in mystr and post in mystr:
         return mystr[mystr.index(pre)+len(pre):mystr.index(post)]
         
@@ -26,10 +28,23 @@ def filter_sequence(mystr):
 
 def frequency_dictionary(data_iter,**kwargs):
     """ Iterates across data, outputs dictionary with frequencies """
+
+    settings = {
+            'pre':None,
+            'post':None,
+            }
+
+    if 'barcode_5p' in kwargs: 
+        settings['pre'] = kwargs['barcode_5p']
+    if 'barcode_3p' in kwargs: 
+        settings['post'] = kwargs['barcode_3p']
+
+    pre,post = settings['pre'],settings['post']
+        
     freq_dict = {}
 
     for i,line in enumerate(data_iter):
-        my_seq = filter_sequence(line)
+        my_seq = filter_sequence(line,pre=pre,post=post)
         if my_seq:
             try:
                 freq_dict[my_seq] += 1

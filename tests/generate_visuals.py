@@ -9,15 +9,18 @@ from methods.visuals import *
 
 def run(**kwargs):
 
-    directory = './datasets/'
+    directory = 'results'
     overwrite = False
+
+    if not os.path.isdir(directory):
+        print('Making {} directory...'.format(directory))
+        os.makedir(directory)
 
     # datasets submited as dictioanry of lists
     settings = {
             'datasets':None,
             'reference':None,
             'comparison':None,
-            'directory':'results',
             }
 
     # update dictionary
@@ -36,7 +39,6 @@ def run(**kwargs):
     datasets = settings['datasets']
     reference = settings['reference']
     comparison = settings['comparison']
-    directory = settings['directory']
 
     # change in directory
     home = os.getcwd() 
@@ -53,7 +55,7 @@ def run(**kwargs):
             os.chdir(results_folder)
             break
 
-    print('Saving figure in folder: {}...'.format(results_folder))
+    print('Saving figures in folder: {}...'.format(results_folder))
 
     # generate figure batches for each folder
     if datasets:
