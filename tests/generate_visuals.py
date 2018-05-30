@@ -18,7 +18,6 @@ def run(**kwargs):
             'reference':None,
             'comparison':None,
             'directory':'results',
-            'targets':('BC','Domains')
             }
 
     # update dictionary

@@ -31,6 +31,10 @@ def run(**kwargs):
         settings['sequence_reference_filename'] = kwargs['sequence_reference_filename']
     if 'domain_reference_filename' in kwargs: 
         settings['domain_reference_filename'] = kwargs['domain_reference_filename']
+    if 'dist_function' in kwargs: 
+        settings['dist_function'] = kwargs['dist_function']
+    if 'dist_threshold' in kwargs: 
+        settings['dist_threshold'] = kwargs['dist_threshold']
     if 'overwrite' in kwargs: 
         overwrite = kwargs['overwrite']
 

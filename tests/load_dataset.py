@@ -23,7 +23,7 @@ def run(**kwargs):
             'clustering_threshold':                                   3,
             'silent':                                             False,
             'dataset_filenames':                      dataset_filenames,
-            'count_threshold':                                        1,
+            'count_threshold':                                       10,
             }
 
     # update dictionary

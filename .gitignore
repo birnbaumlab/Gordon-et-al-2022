@@ -20,3 +20,4 @@ results/
 # Testing files
 .test.py
 debug.log
+.swp

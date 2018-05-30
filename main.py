@@ -20,15 +20,27 @@ dataset_filenames = {
         }
 
 settings = {
-        'dataset_filenames': dataset_filenames,
-        'count_threshold':                  10,
+        # general settings
+        'overwrite':                                          False,
+        'silent':                                             False,
+        # dataset settings
+        'clustering_threshold':                                   3,
+        'dataset_filenames':                      dataset_filenames,
+        'count_threshold':                                       10,
+        # reference settings
+        'sequence_reference_filename':             'CCS_Run2.fastq', 
+        'domain_reference_filename': 'ICD lists and sequences.xlsx', 
+        'dist_function':                                  'hamming',
+        'dist_threshold':                                       0.8,
+        # comparison settings
+        # visual settings
         }
 
 datasets = load_dataset.run(**settings)
-reference = create_reference.run()
-comparison = compare_datasets.run(datasets,reference=reference)
+reference = create_reference.run(**settings)
+comparison = compare_datasets.run(datasets,reference=reference,**settings)
 
-generate_visuals.run(datasets=datasets,reference=reference,comparison=comparison)
+generate_visuals.run(datasets=datasets,reference=reference,comparison=comparison,**settings)
 
 print('Finished!')
 
