@@ -3,6 +3,8 @@ python-venv
 
 # Compiled 
 *.pyc
+*.swp
+*.py~
 
 # Produced files
 references/
@@ -13,7 +15,6 @@ results/
 *.xlsx
 *.csv
 *.fastq
-*.swp
 
 # Data
 *.rtf
