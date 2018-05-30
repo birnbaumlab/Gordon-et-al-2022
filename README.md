@@ -1,5 +1,9 @@
 # DomainSeq
 
+Author: Patrick V. Holec
+
+Created: May 2018
+
 ## Overview
 This project is a pipeline for analysis of long-read enrichment processes. Specifically, if a library is generated composed of multiple domains, each member of each library in each selection cannot be observed easily through Illumina sequencing due to read-length restrictions. Additionally, PacBio provides the necesssary read-length, but is throughput limited. In these cases, multiple sources of sequencing data can be integrated to allow rapid, deep sequencing of libraries. Three types of files need to be provided:
 
@@ -14,8 +18,7 @@ This project is a pipeline for analysis of long-read enrichment processes. Speci
 A number of user controls are provided for each step of analysis along this analysis and can be scaled to any dataset size, taking appropriate steps to minimize computation time.
 
 ### TODO:
-   Multithreading
-   User control of BC 5'/3'
+  - Multithreading
 
 ## Requirements
 This package has only been tested on Unix/Linux (OSX, Ubuntu, etc). The project is not platform specific, but installation instructions only apply to these systems. Additionally, all code is formated for Python 3.X.
