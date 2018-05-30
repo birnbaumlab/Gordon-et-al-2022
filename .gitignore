@@ -13,6 +13,7 @@ results/
 *.xlsx
 *.csv
 *.fastq
+*.swp
 
 # Data
 *.rtf
@@ -20,4 +21,3 @@ results/
 # Testing files
 .test.py
 debug.log
-.swp
