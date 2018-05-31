@@ -14,7 +14,7 @@ def run(**kwargs):
 
     if not os.path.isdir(directory):
         print('Making {} directory...'.format(directory))
-        os.makedir(directory)
+        os.mkdir(directory)
 
     # datasets submited as dictioanry of lists
     settings = {
@@ -51,7 +51,7 @@ def run(**kwargs):
         if os.path.isdir(results_folder): 
             continue
         else:
-            os.makedirs(results_folder)
+            os.mkdir(results_folder)
             os.chdir(results_folder)
             break
 

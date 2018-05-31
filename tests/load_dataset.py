@@ -17,7 +17,7 @@ def run(**kwargs):
 
     if not os.path.isdir(directory):
         print('Making {} directory...'.format(directory))
-        os.makedir(directory)
+        os.mkdir(directory)
 
     # datasets submited as dictioanry of lists
     dataset_filenames = {

@@ -21,7 +21,7 @@ def run(**kwargs):
 
     if not os.path.isdir(directory):
         print('Making {} directory...'.format(directory))
-        os.makedir(directory)
+        os.mkdir(directory)
 
     settings = {
             'sequence_reference_filename':             'CCS_Run2.fastq', 
