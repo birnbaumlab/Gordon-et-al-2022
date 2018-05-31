@@ -26,7 +26,11 @@ This package has only been tested on Unix/Linux (OSX, Ubuntu, etc). The project 
 ## Installation
 We recommend using this package through a [virtual environment](https://docs.python.org/3/library/venv.html). This creates an "instance" of Python that is isolated from the rest of your system. To do this, open terminal and do the following:
 
-1. Clone/download this package, unzip it, and move into the base directory (".../DomainSeq/") using [change directory](https://www.rapidtables.com/code/linux/cd.html) commands.
+1. Clone repository by typing:
+
+   > git clone git@github.mit.edu:<YOUR MIT GITHUB USERNAME>/DomainSeq.git
+
+and move into the base directory (".../DomainSeq/") using [change directory](https://www.rapidtables.com/code/linux/cd.html) commands.
 
 2. Install the virtual environment package to your native Python:
 
@@ -52,5 +56,11 @@ Great! If these commands worked without errors, you have:
 + Copied the project
 + Created a virtual Python environment
 + Install the required packages for the project
+
+If you ever want to update your current version, simply type:
+
+   > git pull
+   
+which will update your local repository to the remote repository's latest version.
 
 See the wiki for information on usage.
