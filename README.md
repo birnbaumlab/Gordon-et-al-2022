@@ -26,29 +26,33 @@ This package has only been tested on Unix/Linux (OSX, Ubuntu, etc). The project 
 ## Installation
 We recommend using this package through a [virtual environment](https://docs.python.org/3/library/venv.html). This creates an "instance" of Python that is isolated from the rest of your system. To do this, open terminal and do the following:
 
-1. Clone repository by typing:
+1. Add an SSH key to your computer:
+
+https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/#platform-linux
+
+2. Clone repository by typing:
 
    > git clone git@github.mit.edu:USERNAME/DomainSeq.git
 
 where USERNAME is your MIT Github username. Move into the base directory (".../DomainSeq/") using [change directory](https://www.rapidtables.com/code/linux/cd.html) commands.
 
-2. Install the virtual environment package to your native Python:
+3. Install the virtual environment package to your native Python:
 
    > python3 -m pip install --user virtualenv
 
-3. Use this package to make a virtual environment of Python 3:
+4. Use this package to make a virtual environment of Python 3:
 
    > python3 -m virtualenv domainseq-venv
    
    Note: This creates a folder in your current directory called "domainseq-venv" which contains your virtual environment. Call it whatever you want!
    
-4. Activate your virtual environment by declaring it as your source for Python:
+5. Activate your virtual environment by declaring it as your source for Python:
 
    > source domainseq-venv/bin/activate
 
    Note: This command causes the virtual environment (your "domainseq-venv" folder) to be prioritized as the version of Python your session will use.
    
-5. Install the required packages for the project:
+6. Install the required packages for the project:
 
    > pip install -r requirements.txt
    
