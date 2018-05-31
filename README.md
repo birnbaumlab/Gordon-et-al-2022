@@ -28,9 +28,9 @@ We recommend using this package through a [virtual environment](https://docs.pyt
 
 1. Clone repository by typing:
 
-   > git clone git@github.mit.edu:{YOUR MIT GITHUB USERNAME}/DomainSeq.git
+   > git clone git@github.mit.edu:USERNAME/DomainSeq.git
 
-and move into the base directory (".../DomainSeq/") using [change directory](https://www.rapidtables.com/code/linux/cd.html) commands.
+where USERNAME is your MIT Github username. Move into the base directory (".../DomainSeq/") using [change directory](https://www.rapidtables.com/code/linux/cd.html) commands.
 
 2. Install the virtual environment package to your native Python:
 
