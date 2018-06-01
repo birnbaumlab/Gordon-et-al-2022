@@ -43,6 +43,8 @@ def write_counts(datasets_dict,**kwargs):
         # transform dataset
         if reference:
             # if we have a reference to translate barcodes...
+            for k,v in reference.items():
+                print(k,v)
             bc2domain = [(k,collections.Counter(v).most_common(1)) 
                                for k,v in reference.items()]
             bc2domain = dict([(k,v[0][0]) for k,v in bc2domain if len(v) > 0])
