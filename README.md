@@ -32,9 +32,9 @@ https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/#pl
 
 2. Clone repository by typing:
 
-   > git clone git@github.mit.edu:USERNAME/DomainSeq.git
+   > git clone git@github.mit.edu:pholec/DomainSeq.git
 
-where USERNAME is your MIT Github username. Move into the base directory (".../DomainSeq/") using [change directory](https://www.rapidtables.com/code/linux/cd.html) commands.
+and move into the base directory (".../DomainSeq/") using [change directory](https://www.rapidtables.com/code/linux/cd.html) commands.
 
 3. Install the virtual environment package to your native Python:
 
