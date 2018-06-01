@@ -24,7 +24,7 @@ def reference_visuals(reference):
     ### BARCODE DOMAIN COUNTS ###
     # number of functional reads
     domain_freq = collections.Counter([len(v.split(',')) for v in bc2domain.values()])
-    x,y = domain_freq.keys(),domain_freq.values()
+    x,y = list(domain_freq.keys()),list(domain_freq.values())
     plt.figure()
     plt.bar(x,y,align='center',alpha=0.5)
 
