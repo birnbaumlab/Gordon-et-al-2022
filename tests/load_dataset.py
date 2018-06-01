@@ -60,10 +60,11 @@ def run(**kwargs):
             loaded_settings = get_xlsx_settings(wb)
 
             # weird corner case >.<
-            if 'TRUE' in loaded_settings['silent']:
-                loaded_settings['silent'] = True 
-            if 'FALSE' in loaded_settings['silent']:
-                loaded_settings['silent'] = False
+            if not isinstance(loaded_settings['silent'],bool):
+                if 'TRUE' in loaded_settings['silent']:
+                    loaded_settings['silent'] = True 
+                if 'FALSE' in loaded_settings['silent']:
+                    loaded_settings['silent'] = False
 
             if loaded_settings == settings: # if match between current settings
 
