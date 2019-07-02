@@ -19,3 +19,14 @@ def levenshtein_dist(a,b):
     """ Levenshtein distance """
     return distance.levenshtein(a,b)
 
+def get_pprint(silent = True):
+    """ Returns a silent/not silent version of print depending on original passed state """
+    if silent == True:
+        def pprint(*args): pass
+        return pprint
+
+    else:
+        def pprint(*args): print(*args) 
+        return pprint
+    
+

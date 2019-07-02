@@ -9,6 +9,7 @@ from methods.enrichment import *
 from methods.loader import *
 from methods.output import *
 from methods.visuals import *
+from methods.utilities import get_pprint
 
 def run(**kwargs):
 
@@ -49,16 +50,26 @@ def run(**kwargs):
     if 'overwrite' in kwargs: 
         overwrite = kwargs['overwrite']
 
+    pprint = get_pprint(settings['silent'])
+
     # check for existing reference objects
     if overwrite == False:
+        # first, search for existing reference files so we don't have to redo this step
         for fname in os.listdir(directory):
+            
             if not fname.endswith('.xlsx'): continue # escape sequence for non-excel
 
             wb = openpyxl.load_workbook(os.path.join(directory,fname))
 
+            # this function is found in methods.loader
+            # reads a sheet SETTINGS in a excel file and converts it to a dictionary of settings
+            # this way, we can keep a record of what settings previous references used
+            # if we find one that has the same set of settings as what we want, we can use it!
             loaded_settings = get_xlsx_settings(wb)
 
             # weird corner case >.<
+            # since silent is a setting, but does not modify the generation of a reference,
+            # we don't want to use this to prevent us from using this reference document
             if not isinstance(loaded_settings['silent'],bool):
                 if 'TRUE' in loaded_settings['silent']:
                     loaded_settings['silent'] = True 
@@ -71,15 +82,15 @@ def run(**kwargs):
 
                 if decision.upper() == 'Y' or decision == '':
                     datasets_dict = _get_data(wb)
-                    print('\nDataset loaded containing {} selections:'.format(len(datasets_dict)))
+                    pprint('\nDataset loaded containing {} selections:'.format(len(datasets_dict)))
                     for selection_name,datasets in datasets_dict.items():
-                        print('-- {} across {} rounds:'.format(selection_name,len(datasets)))
+                        pprint('-- {} across {} rounds:'.format(selection_name,len(datasets)))
                         for i,dataset in enumerate(datasets):
-                            print('---- Round {} - {} barcodes'.format(i,len(dataset)))
+                            pprint('---- Round {} - {} barcodes'.format(i,len(dataset)))
                             
                     return datasets_dict 
 
-    print ('Starting analysis...')
+    pprint('Starting analysis...')
 
     dataset_generators = {}
     dataset_dicts = {}
@@ -104,11 +115,11 @@ def run(**kwargs):
             }
 
     # Publish data
-    print ('Publishing data...')
+    pprint ('Publishing data...')
     publish_datasets_to_excel(data_dict,directory)
-    print ('Finished!')
+    pprint ('Finished!')
 
-    print ('Job Finished!')
+    pprint ('Job Finished!')
 
     return dataset_dicts
 

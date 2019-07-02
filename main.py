@@ -54,6 +54,34 @@ def main():
     """ MODIFY ANYTHING ABOVE """
     """ --------------------- """ 
 
+    """
+    There exists four major methods here:
+
+        load_dataset.run(**settings)
+
+            Inputs: keyword arguments
+                clustering_threshold (default: 3)
+                silent (default: False)
+                dataset_filenames (default: dataset_filenames)
+                count_threshold (default: 10)
+                barcode_5p (default: None)
+                barcode_3p (default: None)
+                overwrite (default: False)
+
+            Outputs: 
+
+        create_reference.run(**settings)
+                
+            Inputs: keyword arguments
+                sequence_reference_filename (default: 'CCS_Run2.fastq')
+                domain_reference_filename (default: 'ICD lists and sequences.xlsx')
+                dist_function (default: 'hamming')
+                dist_threshold (default: 0.8)
+
+            Outputs: 
+
+    """
+
     _check_settings(settings)
     settings['results_directory'] =_get_results_directory()
 
@@ -61,6 +89,7 @@ def main():
     datasets = load_dataset.run(**settings)
     print('Finished!')
 
+    '''
     print('Generating reference...')
     reference = create_reference.run(**settings)
     print('Finished!')
@@ -72,6 +101,7 @@ def main():
     print('Generating visuals...')
     generate_visuals.run(datasets=datasets,reference=reference,comparison=comparison,**settings)
     print('Finished!')
+    '''
 
     print('Finished!')
 
