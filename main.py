@@ -1,4 +1,8 @@
 
+# standard libraries
+import os
+
+# custom libraries
 from tests import load_dataset
 from tests import create_reference 
 from tests import compare_datasets 
@@ -51,12 +55,23 @@ def main():
     """ --------------------- """ 
 
     _check_settings(settings)
+    settings['results_directory'] =_get_results_directory()
 
+    print('Collecting datasets...')
     datasets = load_dataset.run(**settings)
-    reference = create_reference.run(**settings)
-    comparison = compare_datasets.run(datasets,reference=reference,**settings)
+    print('Finished!')
 
+    print('Generating reference...')
+    reference = create_reference.run(**settings)
+    print('Finished!')
+
+    print('Analyzing datasets using reference...')
+    comparison = compare_datasets.run(datasets,reference=reference,**settings)
+    print('Finished!')
+
+    print('Generating visuals...')
     generate_visuals.run(datasets=datasets,reference=reference,comparison=comparison,**settings)
+    print('Finished!')
 
     print('Finished!')
 
@@ -82,11 +97,33 @@ def _check_settings(settings):
     # special case
     if not isinstance(settings['dataset_filenames'],dict):
         raise TypeError('settings[dataset_filenames] is not {}'.format(dict))
+
     for key,val in settings['dataset_filenames'].items():
         if not isinstance(settings['dataset_filenames'][key],(list,tuple)):
             raise TypeError('dataset_filenames[{}] is not {}'.format(key,list))
     
+def _get_results_directory():
 
+    """ Generates a directory with a unique index """
+
+    directory = 'results'
+    overwrite = False
+
+    if not os.path.isdir(directory):
+        print('Making {} directory...'.format(directory))
+        os.mkdir(directory)
+
+    # change in directory
+    home = os.getcwd() 
+
+    for i in range(1,10000):
+
+        results_folder = os.path.join(home,directory,str(i).zfill(4))
+
+        if os.path.isdir(results_folder): continue
+        else: break
+
+    return results_folder
 
 # script catch
 if __name__ == "__main__":

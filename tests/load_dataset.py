@@ -52,7 +52,6 @@ def run(**kwargs):
     # check for existing reference objects
     if overwrite == False:
         for fname in os.listdir(directory):
-
             if not fname.endswith('.xlsx'): continue # escape sequence for non-excel
 
             wb = openpyxl.load_workbook(os.path.join(directory,fname))

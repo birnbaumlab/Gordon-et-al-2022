@@ -1,5 +1,6 @@
 
 # standard libraries
+import os
 
 # nonstandard libraries
 
@@ -8,7 +9,7 @@
 from methods.enrichment import *
 
 def run(datasets_dict,**kwargs):
-
+    """ """
     overwrite = False
 
     # datasets submited as dictioanry of lists
@@ -23,8 +24,10 @@ def run(datasets_dict,**kwargs):
     if 'reference' in kwargs: 
         settings['reference'] = kwargs['reference']
 
+
     # local namespace
     reference = settings['reference']
+    directory = kwargs['results_directory']
 
     wb = openpyxl.Workbook() # open new workbook
 
@@ -36,9 +39,12 @@ def run(datasets_dict,**kwargs):
     try: del wb['Sheet']
     except KeyError: pass
 
-    wb.save('results.xlsx')
+    wb.save(os.path.join(directory,'results.xlsx'))
 
-    return comparison
+    return {
+            'data':comparison,
+            'wb':wb,
+            }
 
 
              

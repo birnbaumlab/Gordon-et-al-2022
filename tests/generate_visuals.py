@@ -9,13 +9,6 @@ from methods.visuals import *
 
 def run(**kwargs):
 
-    directory = 'results'
-    overwrite = False
-
-    if not os.path.isdir(directory):
-        print('Making {} directory...'.format(directory))
-        os.mkdir(directory)
-
     # datasets submited as dictioanry of lists
     settings = {
             'datasets':None,
@@ -40,20 +33,9 @@ def run(**kwargs):
     reference = settings['reference']
     comparison = settings['comparison']
 
-    # change in directory
-    home = os.getcwd() 
-    os.chdir(os.path.join(home,directory))
-
-    for i in range(1,10000):
-
-        results_folder = os.path.join(home,directory,str(i).zfill(4))
-
-        if os.path.isdir(results_folder): 
-            continue
-        else:
-            os.mkdir(results_folder)
-            os.chdir(results_folder)
-            break
+    # change directory
+    os.mkdir(settings['results_directory'])
+    os.chdir(settings['results_directory'])
 
     print('Saving figures in folder: {}...'.format(results_folder))
 
