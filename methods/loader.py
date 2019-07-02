@@ -86,7 +86,7 @@ def adjust_frequency_dictionary(freq_dict,**kwargs):
     print('Count threshold ({}) reduced barcodes from {} -> {}'.format(
         count_threshold,len(freq_dict),len(freq_items)))
     
-    freq_items = sorted(freq_items,key=lambda x: -x[1])
+    freq_items = sorted(freq_items,key=lambda x: -x[1]) # order dict as list with highest freq clones
 
     # convert frequency items to minimum processible form
     seq2array = dict([(seq[0],np.array([characters.index(s) 

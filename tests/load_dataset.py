@@ -50,7 +50,11 @@ def run(**kwargs):
     if 'overwrite' in kwargs: 
         overwrite = kwargs['overwrite']
 
+    # changes the print statement based on silent state
     pprint = get_pprint(settings['silent'])
+
+    if settings['silent'] == False:
+        print('Starting analysis...')
 
     # check for existing reference objects
     if overwrite == False:
@@ -78,7 +82,7 @@ def run(**kwargs):
 
             if loaded_settings == settings: # if match between current settings
 
-                decision = input('Discovered existing reference file {}, use? (Y/n)'.format(fname))
+                decision = input('Discovered existing datasets file {}, use? (Y/n)'.format(fname))
 
                 if decision.upper() == 'Y' or decision == '':
                     datasets_dict = _get_data(wb)
@@ -159,6 +163,8 @@ def _get_data(wb):
     return loaded_data
 
 
+if __name__ == "__main__":
+    print('hello')
 
 
 

@@ -2,12 +2,13 @@
 # standard libraries
 import os
 
+# nonstandard libraries
+
 # custom libraries
 from tests import load_dataset
 from tests import create_reference 
 from tests import compare_datasets 
 from tests import generate_visuals 
-# khloe was here
 
 def main():
 
@@ -89,7 +90,6 @@ def main():
     datasets = load_dataset.run(**settings)
     print('Finished!')
 
-    '''
     print('Generating reference...')
     reference = create_reference.run(**settings)
     print('Finished!')
@@ -101,7 +101,6 @@ def main():
     print('Generating visuals...')
     generate_visuals.run(datasets=datasets,reference=reference,comparison=comparison,**settings)
     print('Finished!')
-    '''
 
     print('Finished!')
 
@@ -155,7 +154,7 @@ def _get_results_directory():
 
     return results_folder
 
-# script catch
+# if you call "python main.py", this will run
 if __name__ == "__main__":
     main()
 
