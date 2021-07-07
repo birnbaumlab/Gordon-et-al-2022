@@ -45,6 +45,3 @@ def run(datasets_dict,**kwargs):
             'data':comparison,
             'wb':wb,
             }
-
-
-             

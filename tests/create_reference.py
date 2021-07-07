@@ -9,8 +9,9 @@ import openpyxl
 # homegrown libraries
 from methods.loader import create_data_generator,filter_sequence,get_xlsx_settings
 from methods.utilities import hamming_dist,levenshtein_dist
-from methods.output import publish_reference_to_excel
-from methods.reference import *
+from methods.output2 import publish_reference_to_excel # KG changed from output
+#from methods.reference import *
+from methods.reference3 import * # KG changed from reference
 
 
 
@@ -70,7 +71,7 @@ def run(**kwargs):
             'DATA':bc2domain,
             'SETTINGS':settings,
             }
-    
+        
     # publish to excel
     publish_reference_to_excel(reference_dict,directory=directory)
 

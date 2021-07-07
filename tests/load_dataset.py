@@ -7,7 +7,7 @@ import os
 # homegrown libraries
 from methods.enrichment import *
 from methods.loader import *
-from methods.output import *
+from methods.output2 import *
 from methods.visuals import *
 from methods.utilities import get_pprint
 
@@ -15,7 +15,7 @@ def run(**kwargs):
 
     directory = './datasets/'
     overwrite = False
-
+    
     if not os.path.isdir(directory):
         print('Making {} directory...'.format(directory))
         os.mkdir(directory)

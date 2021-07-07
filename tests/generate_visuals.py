@@ -15,6 +15,8 @@ def run(**kwargs):
             'reference':None,
             'comparison':None,
             }
+    
+    print(settings)
 
     # update dictionary
     if 'datasets' in kwargs: 
@@ -27,6 +29,8 @@ def run(**kwargs):
         settings['results'] = kwargs['results']
     if 'overwrite' in kwargs: 
         overwrite = kwargs['overwrite']
+    if 'results_directory' in kwargs:
+        settings['results_directory'] = kwargs['results_directory'] # KG added
 
     # local namespace
     datasets = settings['datasets']
@@ -34,10 +38,10 @@ def run(**kwargs):
     comparison = settings['comparison']
 
     # change directory
-    os.mkdir(settings['results_directory'])
+    #os.mkdir(settings['results_directory'])
     os.chdir(settings['results_directory'])
 
-    print('Saving figures in folder: {}...'.format(results_folder))
+    #print('Saving figures in folder: {}...'.format(results_folder)) # KG removed print statement
 
     # generate figure batches for each folder
     if datasets:

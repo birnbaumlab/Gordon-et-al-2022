@@ -18,15 +18,19 @@ def main():
     """ MODIFY ANYTHING BELOW """
     """ --------------------- """ 
 
-    base = '/run/media/pholec/Seagate Backup Plus Drive/Sequence_Files_PVH/'
+    base = '/Users/khloegordon/Dropbox (MIT)/Code/DomainSeq/'
+    temp_extend = 'fastq files/'
 
     dataset_filenames = {
-            'CD69+PD-1-': [base + fname for fname in (
+            'CD69+PD-1-': [base + temp_extend + fname for fname in (
                 'Non-Selected.fastq',
+                'Replicate 1_EGFP+ sorted.fastq',
                 '1st CD69+ sorted.fastq',
+                'Replicate 1_1st CD69+PD-1- sorted.fastq',
                 '2nd CD69+PD-1- sorted.fastq')],
-            'CD69+PD': [base + fname for fname in (
+            'CD69+': [base + temp_extend + fname for fname in (
                 'Non-Selected.fastq',
+                'Replicate 1_EGFP+ sorted.fastq',
                 '1st CD69+ sorted.fastq',
                 '2nd CD69+ sorted.fastq',
                 '3rd CD69+ sorted.fastq')]
@@ -40,10 +44,10 @@ def main():
             'clustering_threshold':                                   3,
             'count_threshold':                                       10,
             'dataset_filenames':                      dataset_filenames,
-            'barcode_5p':                     'CCCTTGGAGAACCACCTTGTTGG',
-            'barcode_3p':              'GTTTAAGAGCTAAGCTGGAAAAAGTGGCAC',
+            'barcode_5p':                          'GGAGAACCACCTTGTTGG',
+            'barcode_3p':                               'GTTTAAGAGCTAA',
             # reference settings
-            'sequence_reference_filename':             'CCS_Run2.fastq', 
+            'sequence_reference_filename': 'fastq files/Total_CCS.fastq', 
             'domain_reference_filename': 'ICD lists and sequences.xlsx', 
             'dist_function':                                  'hamming',
             'dist_threshold':                                       0.8,
@@ -94,6 +98,7 @@ def main():
     reference = create_reference.run(**settings)
     print('Finished!')
 
+    '''
     print('Analyzing datasets using reference...')
     comparison = compare_datasets.run(datasets,reference=reference,**settings)
     print('Finished!')
@@ -101,6 +106,7 @@ def main():
     print('Generating visuals...')
     generate_visuals.run(datasets=datasets,reference=reference,comparison=comparison,**settings)
     print('Finished!')
+    '''
 
     print('Finished!')
 
@@ -143,19 +149,19 @@ def _get_results_directory():
         os.mkdir(directory)
 
     # change in directory
-    home = os.getcwd() 
+    home = os.getcwd()
 
     for i in range(1,10000):
 
         results_folder = os.path.join(home,directory,str(i).zfill(4))
 
         if os.path.isdir(results_folder): continue
-        else: break
+        else: 
+            os.mkdir(results_folder) # KG added
+            break
 
     return results_folder
 
 # if you call "python main.py", this will run
 if __name__ == "__main__":
     main()
-
-
