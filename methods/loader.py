@@ -12,17 +12,54 @@ def create_data_generator(fname):
     with open(fname,'r') as infile:
         for line in infile:
             yield line
+            
+def get_generator(fname):
+    with open(fname,'r') as f:
+        while True:
+            try:
+                entry = [next(f) for _ in range(4)]
+                yield entry[1].strip() # the 2nd line is the sequence
+            except StopIteration:
+                break
+            
+def get_generator2(fname):
+    ''' extracts sequence and quality score '''
+
+    with open(fname,'r') as f:
+        while True:
+            try:
+                entry = [next(f) for _ in range(4)]
+                yield (entry[1].strip(), entry[3].strip())
+                # the 2nd line is the sequence, the 4th line is the quality
+            except StopIteration:
+                break
 
 #---------------------------------#
 
 def filter_sequence(mystr,pre=None,post=None):
     """ Returns filtered string, otherwise False """
     if pre == None:
-        pre  = 'CCCTTGGAGAACCACCTTGTTGG'
+        pre  = 'AGAACCACCTTTGATGAG'
     if post == None:
-        post = 'GTTTAAGAGCTAAGCTGGAAAAAGTGGCAC'
+        post = 'GCAATTCCCCGTATTCCG'
     if pre in mystr and post in mystr:
         return mystr[mystr.index(pre)+len(pre):mystr.index(post)]
+        
+    
+def filter_sequence2(mystr,pre=None,post=None,start=None,stop=None):
+    """ Returns filtered string, otherwise False """
+    if pre == None:
+        pre  = 'AGAACCACCTTTGATGAG'
+    if post == None:
+        post = 'GCAATTCCCCGTATTCCG'
+    if start == None:
+        start = 'GCATCTTCTTCGGCGGAGTG'
+    if stop == None:
+        stop = 'TGACAGATTGGACTGGTCAC'
+    if pre in mystr and post in mystr:
+        if start in mystr and stop in mystr:
+            return mystr[mystr.index(pre)+len(pre):mystr.index(post)],mystr[mystr.index(start)+len(start):mystr.index(stop)]
+        else: return mystr[mystr.index(pre)+len(pre):mystr.index(post)],mystr
         
 #---------------------------------#
 
