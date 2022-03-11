@@ -22,15 +22,13 @@ from matplotlib import patches
 
 #%% -- SETTINGS -- %%#
 
-'''
 base = '/Users/khloegordon/Dropbox (MIT)/Code/DomainSeq/'
 
-dataset_filename = '{}processed datasets/dataset_mapped_0000_CPcounts.xlsx'.format(base)
+dataset_filename = '{}processed datasets/dataset_processed_0005.xlsx'.format(base)
 unselected = 'EGFP+ sorted'
 selections = ['CD69+ R1','CD69+ R2','CD69+ R3','CD69+PD-1- R1','CD69+PD-1- R2']
 ICDfile = 'ICD lists and sequences updated 06.24.21.xlsx'
 positions = 3 # domain positions in CAR intracellular region
-'''
 
 #%% -- tools -- %%#
 
@@ -159,7 +157,7 @@ def CARgen(df,positions = 3):
 #%% -- plotting tools -- %%#
     
 def heatmap(ICDdf,feat_dict,scaletitle,rnd,saveto,cols = ['ICD 1','ICD 2','ICD 3'],
-            remove = False,vmin = -8, vmax = -4,bins = 5):
+            remove = False,vmin = 0, vmax = 4,bins = 5):
     ''' plot ICD frequencies or fold-changes at each position
     ICD dataframe contains frequencies at each position and 
     total counts across all positions for each ICD'''
@@ -225,7 +223,7 @@ def heatmap(ICDdf,feat_dict,scaletitle,rnd,saveto,cols = ['ICD 1','ICD 2','ICD 3
     plt.tight_layout() # must use with newest version of matplotlib
     
     plt.savefig(saveto+'/'+rnd+' '+scaletitle+'.pdf', transparent = True)
-    #plt.show()   
+    plt.show()   
     
     print('{} {}.pdf exported!'.format(rnd,scaletitle))
         
@@ -276,42 +274,39 @@ def piechart(ILdf,rnd,saveto,
     ax2.set_title(rnd)
 
     plt.savefig(saveto+'/'+rnd+' '+'pie chart.pdf', transparent = True)
-    #plt.show()    
+    plt.show()    
     
     print('{} pie chart exported!'.format(rnd))
     
 #%% -- key functions -- %%#
     
-def write2excel(writer,ILdf,ICDdf,Famdf,sheet,Gendf = False):
+def write2excel(ILdf,ICDdf,Famdf,Gendf,sheet_name):
     '''writes all stats for a round of selection to an Excel file'''
         
     ILdf.sort_values(by = 'Frequency', ascending = False)
-    ILdf.to_excel(writer, sheet_name = sheet)
+    ILdf.to_excel(writer, sheet_name = sheet_name)
         
     workbook = writer.book
-    worksheet = workbook.add_worksheet('{} STATS'.format(sheet))
-    writer.sheets['{} STATS'.format(sheet)] = worksheet
+    worksheet = workbook.add_worksheet('{} STATS'.format(sheet_name))
+    writer.sheets['{} STATS'.format(sheet_name)] = worksheet
     
     ICDdf.name = 'ICD frequencies'
     Famdf.name = 'ICD family frequencies'
-    
+    Gendf.name = 'CAR generation frequencies'
+
     worksheet.write_string(0,0, ICDdf.name)    
-    ICDdf.to_excel(writer,sheet_name = '{} STATS'.format(sheet),startrow = 1, 
+    ICDdf.to_excel(writer,sheet_name = '{} STATS'.format(sheet_name),startrow = 1, 
                    startcol = 0)
     worksheet.write_string(0, ICDdf.shape[1] + 2, Famdf.name)
-    Famdf.to_excel(writer,sheet_name = '{} STATS'.format(sheet),startrow = 1, 
+    Famdf.to_excel(writer,sheet_name = '{} STATS'.format(sheet_name),startrow = 1, 
                    startcol = ICDdf.shape[1] + 2)
-    
-    if isinstance(Gendf, pd.DataFrame):
-        
-        Gendf.name = 'CAR generation frequencies'
-        worksheet.write_string(0, ICDdf.shape[1] + Famdf.shape[1] + 4, Gendf.name)
-        Gendf.to_excel(writer,sheet_name = '{} STATS'.format(sheet),startrow = 1, 
-                       startcol = ICDdf.shape[1] + Famdf.shape[1] + 4)
+    worksheet.write_string(0, ICDdf.shape[1] + Famdf.shape[1] + 4, Gendf.name)
+    Gendf.to_excel(writer,sheet_name = '{} STATS'.format(sheet_name),startrow = 1, 
+                   startcol = ICDdf.shape[1] + Famdf.shape[1] + 4)
     
     return
 
-def process_data(ILdf,ICDs,ICDdict,cols,sel,norm = False, gen = False):
+def process_data(ILdf0,ILdf,gen,ICDs,ICDdict,cols,sel):
     '''Adds barcode frequencies, log2 fold-changes relative to the unselected 
     population, ICD frequencies at all positions, ICD family frequencies, and
     CAR generation to dataset dataframes
@@ -320,10 +315,9 @@ def process_data(ILdf,ICDs,ICDdict,cols,sel,norm = False, gen = False):
     '''
 
     ILdf = count2freq(ILdf) # add barcode frequencies
-    if isinstance(norm, pd.DataFrame):
-        ILdf = log2fc(norm,ILdf) # calculate fold changes
-        ILdf.sort_values(by = 'Fold change',ascending = False) # sort by fold change
-        ILdf.fillna({'Frequency':0,'Frequency_unselected':0})
+    ILdf = log2fc(ILdf0,ILdf) # calculate fold changes
+    ILdf.sort_values(by = 'Fold change',ascending = False) # sort by fold change
+    ILdf.fillna({'Frequency':0,'Frequency_unselected':0})
     
     ICDfreq = feature_filter(ILdf,ICDs) # count instances of each ICD at each position and across all positions
 
@@ -334,318 +328,7 @@ def process_data(ILdf,ICDs,ICDdict,cols,sel,norm = False, gen = False):
                                    columns  = cols + ['Total'])
     Famdf = pd.DataFrame.from_dict(Famfreq, orient = 'index', 
                                    columns = ['Frequency'])
-    
-    if gen: # split by CAR generation
-        
-        ILdf,gen = CARgen(ILdf)
-        Gendf = pd.DataFrame.from_dict(gen, orient = 'index')
-    
-    else:
-        
-        Gendf = False
-                
-    return ILdf,ICDdf,Famdf,Gendf
-
-#%% -- MAIN -- %%#
-    
-def run(dataset_path,**kwargs):
-    
-    unselected = ''
-    gen_split = True
-    freq_plot = True
-    FC_plot = False
-    pie_plot = False
-    positions = 3
-    vmin = -8
-    vmax = -4
-    
-    if 'normalize_to' in kwargs:
-        unselected = kwargs['normalize_to']
-
-    if 'dataset_sheetnames' in kwargs:
-        sheetnames = kwargs['dataset_sheetnames']
-                    
-    if 'split_by_CAR_generation' in kwargs:
-        gen_split = kwargs['split_by_CAR_generation']
-        
-    if 'domain_reference_filename' in kwargs:
-        ICDfile = kwargs['domain_reference_filename']
-        
-    if 'ICD_positions' in kwargs:
-        positions = kwargs['ICD_positions']
-        
-    if 'frequency_heatmap' in kwargs:
-        freq_plot = kwargs['frequency_heatmap']
-        
-    if 'log2FC_heatmap' in kwargs:
-        FC_plot = kwargs['log2FC_heatmap']
-        
-    if 'pie_plot' in kwargs:
-        pie_plot = kwargs['pie_plot']
-        
-    if 'vmin' in kwargs:
-        vmin = kwargs['vmin']
-        
-    if 'vmax' in kwargs:
-        vmax = kwargs['vmax']
-        
-    # make new Excel file export path
-    counter = 1
-    path = './processed datasets/processed_dataset_'
-    while os.path.exists(path + str(counter).zfill(4) + '.xlsx'):
-        counter += 1
-    export_path = path + str(counter).zfill(4) + '.xlsx'
-            
-    # create new Excel spreadsheet
-    writer = pd.ExcelWriter(path + str(counter).zfill(4) + '.xlsx', engine = 'xlsxwriter')
-        
-    # import ICD metadata
-    ICDmeta = pd.read_excel('./' + ICDfile, 
-                            usecols = 'A:B')
-    ICDdict = {row['ICD']:row['Domain family'] for i,row in ICDmeta.iterrows()}
-    ICDs = [key for key in ICDdict.keys()]
-    #print('ICD metadata imported!')
-    
-    # set list of columns to use for ICDs in DataFrame
-    cols = ['ICD {}'.format(i+1) for i in range(positions)]
-    #cols_total = cols + ['Total']
-        
-    # import unselected Illumina data
-    ILdf0 = pd.read_excel(dataset_path,sheet_name = unselected)
-    # remove Unnamed columns from DataFrame
-    for column in list(ILdf0.columns.values):
-        if 'Unnamed:' in column: del ILdf0[column]
-
-    # process unselected Illumina data
-    print('Processing unselected data...')
-    ILdf0, ICDdf0, Famdf0, Gendf0 = process_data(ILdf0,ICDs,ICDdict,cols,unselected,
-                                            norm = False, gen = gen_split)
-    print('Unselected data imported')
-    
-    '''
-    ILdf0 = count2freq(ILdf0) # convert counts to frequencies
-    ICDfreq0 = feature_filter(ILdf0,ICDs) # count ICD frequencies
-    Famfreq0 = famfilter(ICDfreq0,ICDdict) # count ICD family frequencies
-    if kwargs['split_by_CAR_generation']:
-        ILdf0,gen0 = CARgen(ILdf0) # identify and assign CAR generation
-    
-    # copy unselected stats to dataframes
-    ICDdf0 = pd.DataFrame.from_dict(ICDfreq0, orient = 'index', 
-                                   columns  = cols_total)
-    Famdf0 = pd.DataFrame.from_dict(Famfreq0, orient = 'index', 
-                                   columns = ['Frequency'])
-    Gendf0 = pd.DataFrame.from_dict(gen0, orient = 'index')
-    '''
-        
-    # write unselected data to Excel spreadsheet
-    write2excel(writer,ILdf0,ICDdf0,Famdf0,sheet = unselected,Gendf = Gendf0)
-    
-    print('Unselected Illumina data processed and exported!')
-    
-    # make new directory for figures
-    for i in range(10000):
-        figure_folder = './figures/statistics_plots_'+ str(i).zfill(4)
-        if os.path.isdir(figure_folder):
-            continue
-        else:
-            os.mkdir(figure_folder)
-            break
-
-    # generate visuals for unselected Illumina data
-    print('Generating visuals for unselected Illumina data')
-    if pie_plot:
-        # create CAR frequency pie chart colored by generation for unselected population
-        piechart(ILdf0,unselected,saveto = figure_folder)
-
-    if freq_plot:
-        ICDdf0_log2freq = np.log2(ICDdf0)
-        heatmap(ICDdf0_log2freq,
-                feat_dict = ICDdict,
-                scaletitle = '$log_2$(frequency)',
-                saveto = figure_folder,
-                vmin = vmin, vmax = vmax,
-                rnd = unselected)
-        
-    # filter out unselected sheet
-    sheetnames = [sheet for sheet in sheetnames if unselected not in sheet]
-    print(sheetnames)
-    
-    # loop through each round of selection
-    for sheet in sheetnames:
-        
-        print('Processing {} dataset...'.format(sheet))
-        ILdf = pd.read_excel(dataset_path,sheet_name = sheet) # read dataset
-        for column in list(ILdf.columns.values): # remove Unnamed columnss
-            if 'Unnamed:' in column: del ILdf[column]
-        
-        '''
-        ILdf,gen = CARgen(ILdf) # count and annotate instances of each CAR generation
-        ILdf,ICDdf,Famdf,Gendf = process_data(ILdf0,ILdf,gen,ICDs,ICDdict,cols,sheet)
-        '''
-        if unselected:
-            ILdf, ICDdf, Famdf, Gendf = process_data(ILdf,ICDs,ICDdict,cols,sheet,
-                                                norm = ILdf0, gen = gen_split)
-        else:
-            ILdf, ICDdf, Famdf, Gendf = process_data(ILdf,ICDs,ICDdict,cols,sheet,
-                                                norm = False, gen = gen_split)
-
-        ILdf = ILdf.sort_values(by = 'Frequency',ascending = False)
-                
-        # write stats in worksheet
-        write2excel(writer,ILdf,ICDdf,Famdf,sheet = sheet,Gendf = Gendf)   
-        
-        # generate visuals for unselected Illumina data
-        print('Generating visuals for {} Illumina data'.format(sheet))
-        if pie_plot:
-            # create CAR frequency pie chart colored by generation for unselected population
-            piechart(ILdf,sheet,saveto = figure_folder)
-
-        if freq_plot:
-            ICDdf_log2freq = np.log2(ICDdf)
-            heatmap(ICDdf_log2freq,
-                    feat_dict = ICDdict,
-                    cols = cols,
-                    scaletitle = '$log_2$(frequency)',
-                    saveto = figure_folder,
-                    vmin = vmin, vmax = vmax,
-                    rnd = sheet)
-            
-        if FC_plot:
-            ICDdf_log2fc = np.log2(np.divide(ICDdf,ICDdf0))
-            heatmap(ICDdf_log2fc, 
-                    feat_dict = ICDdict, 
-                    cols = cols,
-                    scaletitle = '$log_2$(fold-change)',
-                    saveto = figure_folder,
-                    rnd = sheet)
-
-        print('{} Illumina data processed and figures exported!'.format(sheet))
-            
-    """ record settings used to generate processed data """
-    today = datetime.strftime(datetime.now(),"%m/%d/%Y %H:%M:%S")
-    settings = {'dataset_filename':  [dataset_path],
-                'normalized to':     [unselected],
-                'date and time':     [today]}
-    
-    settings = pd.DataFrame(list(settings.values()),index = list(settings.keys()),columns=['Input'])
-                                       
-    settings.to_excel(writer, sheet_name = 'SETTINGS')
-    
-    writer.save()
-        
-    return export_path, figure_folder
-
-'''
-### Run script ###
-        
-base = '/Users/khloegordon/Dropbox (MIT)/Code/DomainSeq/'
-os.chdir(base)
-
-### --- analysis and visuals settings --- ###
-settings = {# mapped dataset filename, if already processed -- overrides domain_mapping
-            # must be placed in processed datasets folder
-            'mapped_dataset_filename':   
-                                         'mapped_dataset_CD4_sel1.xlsx',
-            'dataset_sheetnames':                       ['1A unstim d0',
-                                                         '1B unstim d1',
-                                                          '1C stim d12',
-                                                        '1D unstim d13',
-                                                          '1E stim d13',
-                                                            '1F CM d13',
-                                                           '1G SCM d13',
-                                                            '1H EM d13',
-                                                           '1I EFF d13'
-                                                                      ],
-            'domain_reference_filename': 
-                        'ICD lists and sequences updated 12.21.21.xlsx',
-            'ICD_positions':                                          3,
-            'normalize_to':                              '1B unstim d1',
-            'frequency_heatmap':                                   True,
-            'log2FC_heatmap':                                     False,
-            'pie_plot':                                           False,
-            # (generates pie charts to show CAR generation breakdown, 
-               #adds CAR generation column to excel sheet)
-            'split_by_CAR_generation':                             True,
-            }
-        
-# analyze ICD frequencies and generate plots
-print('Analyzing dataset...')
-processed_path = run(base + 'processed datasets/' + settings['mapped_dataset_filename'],**settings)
-print('Finished! Exported to ' + processed_path[0])
-'''
-
-
-### Archived code ###
-        
-'''
-# filter each dataset for each round of selection for given CAR generation 
-for i in range(positions):
-    
-    pos_subset = list(range(0,i+1)) # ICD columns to keep for i+1_th generation
-    cols_subset = ['ICD {}'.format(j+1) for j in range(i+1)]
-    
-    # create ICD frequencies for i_th generation of CARs for unselected population
-    ILdf0_subset = ILdf0[ILdf0['Gen'] == i+1] # filter for i+1_th generation
-    ICDfreq0_subset = feature_filter(ILdf0_subset,ICDs) # count ICD frequencies
-    ICDdf0_subset = pd.DataFrame.from_dict(ICDfreq0_subset, orient = 'index')
-    # keep ICD frequencies for positions included in i+1_th generation CARs only
-    ICDdf0_subset = ICDdf0_subset.iloc[:,pos_subset] 
-    ICDdf0_subset.columns = cols_subset
-
-    # create ICD frequencies for i+1_1_th generation of CARs for selected population
-    ILdf_subset = ILdf[ILdf['Gen'] == i+1]
-    ICDfreq_subset = feature_filter(ILdf_subset,ICDs)
-    ICDdf_subset = pd.DataFrame.from_dict(ICDfreq_subset, orient = 'index')
-    ICDdf_subset = ICDdf_subset.iloc[:,pos_subset]
-    ICDdf_subset.columns = cols_subset
-    
-    # Plot heatmap of log2 frequency of each ICD for i+1_th generation of CARs
-    ICDdf_subset_log2freq = np.log2(ICDdf_subset)
-    heatmap(ICDdf_subset_log2freq, feat_dict = ICDdict, cols = cols_subset,
-            scaletitle = '$log_2$(frequency)',saveto = figure_folder,
-            vmin = -12, vmax = 0,bins = 7,rnd = sel + ' Gen {} CARs'.format(i+1))        
-    
-    # Plot heatmap of log2 fold-change of each ICD for i+1_th generation of CARs
-    ICD_subset_log2fc = np.log2(np.divide(ICDdf_subset,ICDdf0_subset))
-    heatmap(ICD_subset_log2fc, feat_dict = ICDdict, cols = cols_subset,
-            scaletitle = '$log_2$(fold-change)',saveto = figure_folder,
-            rnd = sel + ' Gen {} CARs'.format(i+1))
-
-# filter for 2nd and 3rd gen CARs combineder
-ILdf0_subset = ILdf0[ILdf0['Gen'] != 1]
-ICDfreq0_subset = feature_filter(ILdf0_subset,ICDs)
-ICDdf0_subset = pd.DataFrame.from_dict(ICDfreq0_subset, orient = 'index', 
-                           columns  = cols_subset + ['Total'])
-
-ILdf_subset = ILdf[ILdf['Gen'] != 1]
-ICDfreq_subset = feature_filter(ILdf_subset,ICDs)
-ICDdf_subset = pd.DataFrame.from_dict(ICDfreq_subset, orient = 'index', 
-                           columns  = cols_subset + ['Total'])
-
-# Plot heatmap of log2 frequency of each ICD
-ICDdf_subset_log2freq = np.log2(ICDdf_subset[cols_subset])
-heatmap(ICDdf_subset_log2freq[cols_subset],feat_dict = ICDdict,
-        scaletitle = '$log_2$(frequency)',saveto = figure_folder,
-        vmin = -20, vmax = 0,rnd = sel + ' Gen 2 + 3 CARs'.format(i+1))        
-
-# Plot heatmap of log2 fold-change of each ICD
-ICD_subset_log2fc = np.log2(np.divide(ICDdf_subset,ICDdf0_subset))
-heatmap(ICD_subset_log2fc[cols_subset],feat_dict = ICDdict,scaletitle = '$log_2$(fold-change)',
-        rnd = sel + ' Gen 2 + 3 CARs',saveto = figure_folder)
-
-def plot(export_path):
-    
-    # make new directory for figures
-    for i in range(10000):
-        figure_folder = os.path.join(base,'figures/heatmaps_piecharts_',str(i).zfill(4))
-        if os.path.isdir(figure_folder):
-            continue
-        else:
-            os.mkdir(figure_folder)
-            break
-    
-    # create CAR frequency pie chart colored by generation for unselected population
-    piechart(ILdf0,unselected,saveto = figure_folder)
+    Gendf = pd.DataFrame.from_dict(gen, orient = 'index')
     
     # Plot pie chart of clonal CAR frequency colored by CAR generation
     piechart(ILdf,sel,saveto = figure_folder)
@@ -659,5 +342,146 @@ def plot(export_path):
     ICD_log2fc = np.log2(np.divide(ICDdf,ICDdf0))
     heatmap(ICD_log2fc[cols],feat_dict = ICDdict,scaletitle = '$log_2$(fold-change)',
             rnd = sel,saveto = figure_folder)
+            
+    return ILdf,ICDdf,Famdf,Gendf
 
-'''
+#%% -- MAIN -- %%#
+    
+def run():
+    # import ICD metadata
+    ICDmeta = pd.read_excel(base + ICDfile, usecols = 'A:B')
+    ICDdict = {row['ICD']:row['Domain family'] for i,row in ICDmeta.iterrows()}
+    ICDs = [key for key in ICDdict.keys()]
+    print('ICD metadata imported!')
+    
+    # set list of columns to use for ICDs in DataFrame
+    cols = ['ICD {}'.format(i+1) for i in range(positions)]
+    cols_total = cols + ['Total']
+        
+    # import unselected Illumina data
+    ILdf0 = pd.read_excel(dataset_filename,sheet_name = unselected)
+    ILdf0,gen0 = CARgen(ILdf0) # identify and assign CAR generation
+    ILdf0 = count2freq(ILdf0) # convert counts to frequencies
+    ICDfreq0 = feature_filter(ILdf0,ICDs) # count ICD frequencies
+    Famfreq0 = famfilter(ICDfreq0,ICDdict) # count ICD family frequencies
+    print('Unselected Illumina data imported and processed!')
+    
+    # copy unselected stats to dataframes
+    ICDdf0 = pd.DataFrame.from_dict(ICDfreq0, orient = 'index', 
+                                   columns  = cols_total)
+    Famdf0 = pd.DataFrame.from_dict(Famfreq0, orient = 'index', 
+                                   columns = ['Frequency'])
+    Gendf0 = pd.DataFrame.from_dict(gen0, orient = 'index')
+    
+    # remove Unnamed columns from DataFrame
+    for column in list(ILdf0.columns.values):
+        if 'Unnamed:' in column: del ILdf0[column]
+        
+    # make new directory for figures
+    for i in range(10000):
+        figure_folder = os.path.join(base,'figures/heatmaps_piecharts_',str(i).zfill(4))
+        if os.path.isdir(figure_folder):
+            continue
+        else:
+            os.mkdir(figure_folder)
+            break
+    
+    # create CAR frequency pie chart colored by generation for unselected population
+    piechart(ILdf0,unselected,saveto = figure_folder)
+    
+    # make new Excel file export path
+    counter = 1
+    path = base + 'processed datasets/dataset_processed_'
+    while os.path.exists(path + str(counter).zfill(4) + '.xlsx'):
+        counter += 1
+            
+    # create new Excel spreadsheet
+    writer = pd.ExcelWriter(path + str(counter).zfill(4) + '.xlsx', engine = 'xlsxwriter')
+    
+    # write unselected data to Excel spreadsheet
+    write2excel(ILdf0,ICDdf0,Famdf0,Gendf0,sheet_name = unselected)
+    
+    # loop through each round of selection
+    for sel in selections:
+        
+        print('Calculating frequencies and fold changes for {} dataset...'.format(sel))
+        ILdf = pd.read_excel(dataset_filename,sheet_name = sel) # read dataset
+        for column in list(ILdf.columns.values): # remove Unnamed columnss
+            if 'Unnamed:' in column: del ILdf[column]
+            
+        ILdf,gen = CARgen(ILdf) # count and annotate instances of each CAR generation
+        ILdf,ICDdf,Famdf,Gendf = process_data(ILdf0,ILdf,gen,ICDs,ICDdict,cols,sel)
+        ILdf = ILdf.sort_values(by = 'Frequency',ascending = False)
+                
+        # write stats in worksheet
+        write2excel(ILdf,ICDdf,Famdf,Gendf,sheet_name = sel)   
+        
+        # filter each dataset for each round of selection for given CAR generation 
+        for i in range(positions):
+            
+            pos_subset = list(range(0,i+1)) # ICD columns to keep for i+1_th generation
+            cols_subset = ['ICD {}'.format(j+1) for j in range(i+1)]
+            
+            # create ICD frequencies for i_th generation of CARs for unselected population
+            ILdf0_subset = ILdf0[ILdf0['Gen'] == i+1] # filter for i+1_th generation
+            ICDfreq0_subset = feature_filter(ILdf0_subset,ICDs) # count ICD frequencies
+            ICDdf0_subset = pd.DataFrame.from_dict(ICDfreq0_subset, orient = 'index')
+            # keep ICD frequencies for positions included in i+1_th generation CARs only
+            ICDdf0_subset = ICDdf0_subset.iloc[:,pos_subset] 
+            ICDdf0_subset.columns = cols_subset
+    
+            # create ICD frequencies for i+1_1_th generation of CARs for selected population
+            ILdf_subset = ILdf[ILdf['Gen'] == i+1]
+            ICDfreq_subset = feature_filter(ILdf_subset,ICDs)
+            ICDdf_subset = pd.DataFrame.from_dict(ICDfreq_subset, orient = 'index')
+            ICDdf_subset = ICDdf_subset.iloc[:,pos_subset]
+            ICDdf_subset.columns = cols_subset
+            
+            # Plot heatmap of log2 frequency of each ICD for i+1_th generation of CARs
+            ICDdf_subset_log2freq = np.log2(ICDdf_subset)
+            heatmap(ICDdf_subset_log2freq, feat_dict = ICDdict, cols = cols_subset,
+                    scaletitle = '$log_2$(frequency)',saveto = figure_folder,
+                    vmin = -12, vmax = 0,bins = 7,rnd = sel + ' Gen {} CARs'.format(i+1))        
+            
+            # Plot heatmap of log2 fold-change of each ICD for i+1_th generation of CARs
+            ICD_subset_log2fc = np.log2(np.divide(ICDdf_subset,ICDdf0_subset))
+            heatmap(ICD_subset_log2fc, feat_dict = ICDdict, cols = cols_subset,
+                    scaletitle = '$log_2$(fold-change)',saveto = figure_folder,
+                    rnd = sel + ' Gen {} CARs'.format(i+1))
+        
+        # filter for 2nd and 3rd gen CARs combineder
+        ILdf0_subset = ILdf0[ILdf0['Gen'] != 1]
+        ICDfreq0_subset = feature_filter(ILdf0_subset,ICDs)
+        ICDdf0_subset = pd.DataFrame.from_dict(ICDfreq0_subset, orient = 'index', 
+                                   columns  = cols_subset + ['Total'])
+    
+        ILdf_subset = ILdf[ILdf['Gen'] != 1]
+        ICDfreq_subset = feature_filter(ILdf_subset,ICDs)
+        ICDdf_subset = pd.DataFrame.from_dict(ICDfreq_subset, orient = 'index', 
+                                   columns  = cols_subset + ['Total'])
+        
+        # Plot heatmap of log2 frequency of each ICD
+        ICDdf_subset_log2freq = np.log2(ICDdf_subset[cols_subset])
+        heatmap(ICDdf_subset_log2freq[cols_subset],feat_dict = ICDdict,
+                scaletitle = '$log_2$(frequency)',saveto = figure_folder,
+                vmin = -20, vmax = 0,rnd = sel + ' Gen 2 + 3 CARs'.format(i+1))        
+        
+        # Plot heatmap of log2 fold-change of each ICD
+        ICD_subset_log2fc = np.log2(np.divide(ICDdf_subset,ICDdf0_subset))
+        heatmap(ICD_subset_log2fc[cols_subset],feat_dict = ICDdict,scaletitle = '$log_2$(fold-change)',
+                rnd = sel + ' Gen 2 + 3 CARs',saveto = figure_folder)
+        
+        print('{} Illumina data processed!'.format(sel))
+            
+    """ record settings used to generate processed data """
+    settings = pd.DataFrame.from_dict({'dataset_filename':dataset_filename,
+                                       'Unselected population':unselected,
+                                       'date and time':datetime.strftime(datetime.now(),
+                                                       "%m/%d/%Y %H:%M:%S")},
+                                        orient = 'index')    
+                                       
+    settings.to_excel(writer, sheet_name = 'SETTINGS')
+    
+    writer.save()
+    
+    return
