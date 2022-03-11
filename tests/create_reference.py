@@ -7,11 +7,11 @@ import pickle
 import openpyxl
 
 # homegrown libraries
-from methods.loader import create_data_generator,filter_sequence,get_xlsx_settings
+from methods.loader import get_generator, create_data_generator,filter_sequence,get_xlsx_settings
 from methods.utilities import hamming_dist,levenshtein_dist
-from methods.output2 import publish_reference_to_excel # KG changed from output
+from methods.output import publish_reference_to_excel # KG changed from output
 #from methods.reference import *
-from methods.reference3 import * # KG changed from reference
+from methods.reference import * # KG changed from reference
 
 
 
@@ -36,12 +36,20 @@ def run(**kwargs):
         settings['sequence_reference_filename'] = kwargs['sequence_reference_filename']
     if 'domain_reference_filename' in kwargs: 
         settings['domain_reference_filename'] = kwargs['domain_reference_filename']
-    if 'dist_function' in kwargs: 
-        settings['dist_function'] = kwargs['dist_function']
-    if 'dist_threshold' in kwargs: 
-        settings['dist_threshold'] = kwargs['dist_threshold']
+    if 'ref_dist_function' in kwargs: 
+        settings['dist_function'] = kwargs['ref_dist_function'] 
+    if 'ref_dist_threshold' in kwargs: 
+        settings['dist_threshold'] = kwargs['ref_dist_threshold'] 
     if 'overwrite' in kwargs: 
         overwrite = kwargs['overwrite']
+    if 'barcode_5p' in kwargs:
+        pre = kwargs['barcode_5p']
+    if 'barcode_3p' in kwargs:
+        post = kwargs['barcode_3p']
+    if 'pre_amplicon' in kwargs:
+        start = kwargs['pre_amplicon']
+    if 'post_amplicon' in kwargs:
+        stop = kwargs['post_amplicon']
 
 
     # check for existing reference objects
@@ -63,8 +71,11 @@ def run(**kwargs):
                 
     
     domain2seq = domain_reference_dictionary(settings['domain_reference_filename'])
-    bc2seq =     sequence_reference_dictionary(settings['sequence_reference_filename'])
-
+    domain2seq = {k:v for k,v in domain2seq.items() if k is not None}
+    bc2seq = sequence_reference_dictionary('./fastq files/' + settings['sequence_reference_filename'],pre,post)
+    #bc2seq = sequence_reference_dictionary('./fastq files/' + settings['sequence_reference_filename'],pre,post,start,stop)
+    # FIX : sequence_reference_dictionary2 uses quality scores from get_generator2 in loader.py 
+    # to sort sequences and trims amplicon region of interest for ICD scanning in sequence_reference_dictionary2
     bc2domain = merge_references(domain2seq,bc2seq,**settings)
     
     reference_dict = {
@@ -73,10 +84,10 @@ def run(**kwargs):
             }
         
     # publish to excel
-    publish_reference_to_excel(reference_dict,directory=directory)
+    fname = publish_reference_to_excel(reference_dict,directory=directory)
 
     # return result
-    return reference_dict
+    return reference_dict, fname
 
 
 def _get_settings(wb):
